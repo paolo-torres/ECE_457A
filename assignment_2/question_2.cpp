@@ -35,6 +35,35 @@ const vector<vector<const char> > maze {
     {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'}
 };
 
+vector<vector<int> > tracePath(map<vector<int>, vector<vector<int>> > &m, int &cost, int i, int j, int iEnd, int jEnd) {
+    vector<vector<int> > path; 
+    int iTrace = iEnd;
+    int jTrace = jEnd;
+    path.push_back({iEnd, jEnd});
+    while (iTrace != i || jTrace != j) {
+        for (auto it = m.begin(); it != m.end(); ++it) {
+            for (int v = 0; v < it->second.size(); ++v) {
+                if (iTrace == it->second[v][0] && jTrace == it->second[v][1]) {
+                    iTrace = it->first[0];
+                    jTrace = it->first[1];
+                    path.push_back({iTrace, jTrace});
+                    if (maze[iTrace][jTrace] == '*') {
+                        cost += 30;
+                    } else {
+                        ++cost;
+                    }
+                }
+            }
+        }
+    }
+    reverse(path.begin(), path.end());
+    return path;
+}
+
+bool isValid(int x, int y, vector<vector<bool> > &visited) {
+    return x >= 0 && x < maze.size() && y >= 0 && y < maze[0].size() && !visited[x][y] && maze[x][y] != '0';
+}
+
 bool bfs(vector<vector<int> > &path, map<vector<int>, vector<vector<int>> > &m, int &cost, int &nodes, int i, int j, int iEnd, int jEnd) {
     vector<vector<bool> > visited(maze.size(), vector<bool>(maze[0].size(), false));
     vector<vector<int> > dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
@@ -45,26 +74,20 @@ bool bfs(vector<vector<int> > &path, map<vector<int>, vector<vector<int>> > &m, 
         vector<int> s = q.front();
         q.pop();
         if (s[0] == iEnd && s[1] == jEnd) {
+            path = tracePath(m, cost, i, j, iEnd, jEnd);
             return true;
         }
         for (int i = 0; i < dirs.size(); ++i) {
             int x = s[0] + dirs[i][0];
             int y = s[1] + dirs[i][1];
-            if (x >= 0 && x < maze.size() && y >= 0 && y < maze[0].size()) {
-                if (!visited[x][y] && maze[x][y] != 0) {
-                    visited[x][y] = true;
-                    q.push({x, y});
-                    if (m.find({s[0], s[1]}) == m.end()) {
-                        m.insert({{s[0], s[1]}, vector<vector<int>>()});
-                    }
-                    m[{s[0], s[1]}].push_back(q.back());
-                    if (maze[x][y] == '*') {
-                        cost += 30;
-                    } else {
-                        ++cost;
-                    }
-                    ++nodes;
+            if (isValid(x, y, visited)) {
+                visited[x][y] = true;
+                q.push({x, y});
+                if (m.find({s[0], s[1]}) == m.end()) {
+                    m.insert({{s[0], s[1]}, vector<vector<int>>()});
                 }
+                m[{s[0], s[1]}].push_back(q.back());
+                ++nodes;
             }
         }
     }
@@ -79,12 +102,8 @@ void applyBFS(int i, int j, int iEnd, int jEnd) {
 
     if (bfs(path, m, cost, nodes, i, j, iEnd, jEnd)) {
         cout << "Path: ";
-        for (auto it = m.begin(); it != m.end(); ++it) {
-            cout << "(" << it->first[0] << "," << it->first[1] << ") : ";
-            for (int i = 0; i < it->second.size(); ++i) {
-                cout << "(" << it->second[i][0] << "," << it->second[i][1] << ") ";
-            }
-            cout << endl;
+        for (int i = 0; i < path.size(); ++i) {
+            cout << '\t' <<  "(" << path[i][0] << "," << path[i][1] << ")" << endl;
         }
         cout << "Cost: \t" << cost << endl;
         cout << "Nodes: \t" << nodes << endl << endl;
@@ -164,14 +183,14 @@ int main() {
     cout << "Breadth First Search" << endl << endl;
 
     applyBFS(13, 2, 5, 23);
-    // applyBFS(13, 2, 3, 2);
-    // applyBFS(24, 0, 0, 24);
+    applyBFS(13, 2, 3, 2);
+    applyBFS(24, 0, 0, 24);
 
-    // cout << "Depth First Search" << endl << endl;
+    cout << "Depth First Search" << endl << endl;
 
-    // applyDFS(13, 2, 5, 23);
-    // applyDFS(13, 2, 3, 2);
-    // applyDFS(24, 0, 0, 24);
+    applyDFS(13, 2, 5, 23);
+    applyDFS(13, 2, 3, 2);
+    applyDFS(24, 0, 0, 24);
 
     return 0;
 }
