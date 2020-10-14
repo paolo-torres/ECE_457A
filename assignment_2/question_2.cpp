@@ -103,10 +103,11 @@ void applyBFS(int i, int j, int iEnd, int jEnd) {
     if (bfs(path, m, cost, nodes, i, j, iEnd, jEnd)) {
         cout << "Path: ";
         for (int i = 0; i < path.size(); ++i) {
-            cout << '\t' <<  "(" << path[i][0] << "," << path[i][1] << ")" << endl;
+            cout <<  "(" << path[i][0] << ", " << path[i][1] << ") > ";
         }
-        cout << "Cost: \t" << cost << endl;
-        cout << "Nodes: \t" << nodes << endl << endl;
+        cout << endl;
+        cout << "Cost: " << cost << endl;
+        cout << "Nodes: " << nodes << endl << endl;
     }
 }
 
@@ -165,10 +166,11 @@ void applyDFS(int i, int j, int iEnd, int jEnd) {
     if (dfs(visited, path, cost, nodes, i, j, iEnd, jEnd)) {
         cout << "Path: ";
         for (int i = 0; i < path.size(); ++i) {
-            cout << '\t' << "(" << path[i].first << "," << path[i].second << ")" << endl;
+            cout << "(" << path[i].first << ", " << path[i].second << ") > ";
         }
-        cout << "Cost: \t" << cost << endl;
-        cout << "Nodes: \t" << nodes << endl << endl;
+        cout << endl;
+        cout << "Cost: " << cost << endl;
+        cout << "Nodes: " << nodes << endl << endl;
     }
 
     for (auto &v: visited) {
