@@ -19,15 +19,15 @@ void applyAnnealingSchedule(double &temp, double alpha, int schedule) {
     } else if (schedule == 4) {
         temp *= alpha;
     } else if (schedule == 5) {
-        temp *= 1.05 * alpha;
+        temp *= 0.99;
     } else if (schedule == 6) {
-        temp *= 1.1 * alpha;
+        temp *= 0.999;
     } else if (schedule == 7) {
-        temp /= 1 + 0.1 * alpha * temp;
-    } else if (schedule == 8) {
-        temp /= 1 + 0.01 * alpha * temp;
-    } else if (schedule == 9) {
         temp /= 1 + 0.001 * alpha * temp;
+    } else if (schedule == 8) {
+        temp /= 1 + 0.0001 * alpha * temp;
+    } else if (schedule == 9) {
+        temp /= 1 + 0.00001 * alpha * temp;
     }
 }
 
@@ -36,11 +36,14 @@ void simulatedAnnealing(double &x1Final, double &x2Final, double &easomFinal,
     double tempFinal = 1;
     int iterations = 10;
 
+    double min = -100;
+    double max = 100;
+
     while (temp > tempFinal) {
         int i = 0;
         while (i < iterations) {
-            double x1 = getRandomValue(-100, 100);
-            double x2 = getRandomValue(-100, 100);
+            double x1 = getRandomValue(min, max);
+            double x2 = getRandomValue(min, max);
             double easom = -cos(x1) * cos(x2) * 
                 exp(-(pow(x1 - M_PI, 2)) - pow(x2 - M_PI, 2));
 
@@ -59,6 +62,9 @@ void simulatedAnnealing(double &x1Final, double &x2Final, double &easomFinal,
             }
             i++;
         }
+        min = min <= M_PI ? min + alpha : min - alpha;
+        max = max >= M_PI ? max - alpha : max + alpha;
+
         applyAnnealingSchedule(temp, alpha, schedule);
     }
 }
