@@ -13,15 +13,15 @@ void applyAnnealingSchedule(double &temp, double alpha, int schedule) {
     if (schedule == 0 || schedule == 1) {
         temp -= alpha;
     } else if (schedule == 2) {
-        temp -= 2 * alpha;
+        temp -= 1.1 * alpha;
     } else if (schedule == 3) {
-        temp -= 3 * alpha;
+        temp -= 1.2 * alpha;
     } else if (schedule == 4) {
-        temp *= alpha;
-    } else if (schedule == 5) {
-        temp *= 0.99;
-    } else if (schedule == 6) {
         temp *= 0.999;
+    } else if (schedule == 5) {
+        temp *= 0.9999;
+    } else if (schedule == 6) {
+        temp *= 0.99999;
     } else if (schedule == 7) {
         temp /= 1 + 0.001 * alpha * temp;
     } else if (schedule == 8) {
