@@ -34,7 +34,7 @@ void applyAnnealingSchedule(double &temp, double alpha, int schedule) {
 void simulatedAnnealing(double &x1Final, double &x2Final, double &easomFinal,
     double temp, double alpha, int schedule) {
     double tempFinal = 1;
-    int iterations = 10;
+    int iterations = 100;
 
     double min = -100;
     double max = 100;
@@ -78,13 +78,19 @@ int main() {
         double easomFinal = -cos(x1Final) * cos(x2Final) * 
             exp(-(pow(x1Final - M_PI, 2)) - pow(x2Final - M_PI, 2));
 
-        double temp = getRandomValue(100, 1000);
+        double temp = getRandomValue(1000, 10000);
         double alpha = getRandomValue(0.1, 0.9);
+
+        cout << "Initial x1: " << x1Final << endl 
+             << "Initial x2: " << x2Final << endl 
+             << "Initial Temp: " << temp << endl
+             << "Alpha: " << alpha << endl
+             << "Schedule: " << i << endl;
 
         simulatedAnnealing(x1Final, x2Final, easomFinal, temp, alpha, i);
 
-        cout << "x1: " << x1Final << endl 
-             << "x2: " << x2Final << endl 
+        cout << "Final x1: " << x1Final << endl 
+             << "Final x2: " << x2Final << endl 
              << "f(x1, x2): " << easomFinal << endl << endl;
     }
 
