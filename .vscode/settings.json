@@ -16,6 +16,13 @@
         "iterator": "cpp",
         "string": "cpp",
         "string_view": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "ios": "cpp",
+        "climits": "cpp",
+        "random": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "stdexcept": "cpp",
+        "iosfwd": "cpp"
     }
 }
