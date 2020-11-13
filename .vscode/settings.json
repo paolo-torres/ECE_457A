@@ -23,6 +23,7 @@
         "sstream": "cpp",
         "streambuf": "cpp",
         "stdexcept": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "functional": "cpp"
     }
 }

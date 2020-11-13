@@ -1,2 +1,2 @@
-g++ -std=c++11 <file_name>.cpp
+g++ -std=c++17 <file_name>.cpp
 ./a.out
