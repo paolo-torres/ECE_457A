@@ -120,18 +120,15 @@ const void displaySolution(vector<vector<int>>& bestLayout, int bestCost) {
     cout << "Cost: " << bestCost << endl;
 }
 
-const void tabuSearch() {
-    const auto flows = getData("Flow.csv");
-    const auto distances = getData("Distance.csv");
-
-    auto iterations = 0;
-
+const void tabuSearch(const vector<vector<int>>& flows, 
+    const vector<vector<int>>& distances, int& iterations, 
     priority_queue<pair<int, vector<vector<int>>>, 
         vector<pair<int, vector<vector<int>>>>, 
-        greater<pair<int, vector<vector<int>>>> > candidates;
-    const auto clearCandidates = candidates;
+        greater<pair<int, vector<vector<int>>>> > candidates,
+    map<vector<vector<int>>, int>& tabuList,
+    vector<vector<int>>& bestLayout, int& bestCost) {
 
-    map<vector<vector<int>>, int> tabuList;
+    const auto clearCandidates = candidates;
 
     vector<vector<int>> layout1(layoutRows, vector<int>(layoutCols, 0));
     auto layout2 = layout1;
@@ -139,15 +136,11 @@ const void tabuSearch() {
     auto layout4 = layout1;
     auto layout5 = layout1;
 
-    auto bestLayout = layout1;
-
     auto cost1 = 0;
     auto cost2 = cost1;
     auto cost3 = cost1;
     auto cost4 = cost1;
     auto cost5 = cost1;
-
-    auto bestCost = INT_MAX;
 
     while (iterations < 100000) {
         layout1 = getLayout();
@@ -189,20 +182,27 @@ const void tabuSearch() {
 
         iterations++;
     }
-
-    displaySolution(bestLayout, bestCost);
 }
 
-/*
-17	4	20	7	6	
-19	15	8	5	3	
-2	11	16	1	13	
-14	18	12	10	9	
-Cost: 2792
-*/
-
 int main() {
-    tabuSearch();
+    const auto flows = getData("Flow.csv");
+    const auto distances = getData("Distance.csv");
+
+    auto iterations = 0;
+
+    priority_queue<pair<int, vector<vector<int>>>, 
+        vector<pair<int, vector<vector<int>>>>, 
+        greater<pair<int, vector<vector<int>>>> > candidates;
+
+    map<vector<vector<int>>, int> tabuList;
+
+    vector<vector<int>> bestLayout(layoutRows, vector<int>(layoutCols, 0));
+    auto bestCost = INT_MAX;
+
+    tabuSearch(flows, distances, iterations, candidates, tabuList, 
+        bestLayout, bestCost);
+
+    displaySolution(bestLayout, bestCost);
 
     return 0;
 }
