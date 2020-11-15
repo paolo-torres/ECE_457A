@@ -1,8 +1,8 @@
-function [ISE,t_r,t_s,M_p] = Q2_perfFCN(x)
+function [ISE,t_r,t_s,M_p] = perfFCN(x)
 
-Kp = x(1,1);
-Ti = x(2,1);
-Td = x(3,1);
+Kp = x(1);
+Ti = x(2);
+Td = x(3);
 G = Kp*tf([Ti*Td,Ti,1],[Ti,0]);
 
 F = tf(1,[1,6,11,6,0]);
