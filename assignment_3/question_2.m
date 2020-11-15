@@ -52,6 +52,17 @@ end
 
 actualCounts = round(expectedCounts);
 
+for i = 1 : populationSize
+    parameters(actualCounts(i) == 0, :) = [];
+    population(actualCounts(i) == 0, :) = [];
+end
+
+parentsToDelete = find(all(population == 0, 2));
+parameters(parentsToDelete, :) = [];
+population = population(any(population, 2), :);
+
+populationSize = size(population, 1);
+
 generations = 150;
 crossoverProbability = 0.6;
 mutationProbability = 0.25;
