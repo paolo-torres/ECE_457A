@@ -40,6 +40,7 @@ for i = 1 : populationSize
 end
 
 fitnessAverage = fitnessSum / populationSize;
+fitnessMax = max(fitnesses(fitnesses > 0));
 
 probabilities = zeros(populationSize, 1);
 expectedCounts = zeros(populationSize, 1);
@@ -54,6 +55,9 @@ actualCounts = round(expectedCounts);
 generations = 150;
 crossoverProbability = 0.6;
 mutationProbability = 0.25;
+
+crossover = rand;
+mutation = rand;
 
 n = 0;
 while n < generations
