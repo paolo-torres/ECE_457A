@@ -3,7 +3,7 @@ clear;
 
 populationSize = 50;
 
-generations = 150;
+numGenerations = 150;
 
 crossoverProbability = 0.6;
 mutationProbability = 0.25;
@@ -31,6 +31,8 @@ inputsMin = zeros(1, 3);
 fitnessMin = intmax;
 outputMin = zeros(1, 4);
 
+bestFitnesses = zeros(1, numGenerations);
+
 for i = 1 : populationSize
     inputs(i, 1) = Kp(i);
     inputs(i, 2) = Ti(i);
@@ -39,8 +41,8 @@ end
 
 tic;
 
-n = 0;
-while n < generations
+n = 1;
+while n <= numGenerations
     fitnesses = zeros(populationSize, 1);
     fitnessSum = 0;
 
@@ -67,6 +69,8 @@ while n < generations
 
         fitnessSum = fitnessSum + fitnesses(i);
     end
+    
+    bestFitnesses(n) = fitnessMin;
 
     fitnessAverage = fitnessSum / populationSize;
 
@@ -310,3 +314,13 @@ while n < generations
     
     toc;
 end
+
+generations = 1 : 1 : numGenerations;
+
+plot(generations, bestFitnesses, 'LineWidth', 3);
+title('Fitness of Best Solution in Each Generation');
+xlabel('Generation');
+ylabel('Fitness of Best Solution');
+grid on;
+ax = gca;
+ax.FontSize = 24;
