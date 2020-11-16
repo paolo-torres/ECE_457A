@@ -20,9 +20,9 @@ minTd = 0.26;
 maxTd = 2.37;
 deltaTd = 0.01;
 
-Kp = minKp + (maxKp - minKp) * rand(50, 1);
-Ti = minTi + (maxTi - minTi) * rand(50, 1);
-Td = minTd + (maxTd - minTd) * rand(50, 1);
+Kp = minKp + (maxKp - minKp) * rand(populationSize, 1);
+Ti = minTi + (maxTi - minTi) * rand(populationSize, 1);
+Td = minTd + (maxTd - minTd) * rand(populationSize, 1);
 
 inputs = zeros(populationSize, 3);
 outputs = zeros(populationSize, 4);
@@ -315,12 +315,12 @@ while n <= numGenerations
     toc;
 end
 
-generations = 1 : 1 : numGenerations;
-
-plot(generations, bestFitnesses, 'LineWidth', 3);
-title('Fitness of Best Solution in Each Generation');
-xlabel('Generation');
-ylabel('Fitness of Best Solution');
-grid on;
-ax = gca;
-ax.FontSize = 24;
+% generations = 1 : 1 : numGenerations;
+% 
+% plot(generations, bestFitnesses, 'LineWidth', 3);
+% title('Fitness of Best Solution in Each Generation');
+% xlabel('Generation');
+% ylabel('Fitness of Best Solution');
+% grid on;
+% ax = gca;
+% ax.FontSize = 24;
