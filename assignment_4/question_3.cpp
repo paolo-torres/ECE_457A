@@ -5,17 +5,6 @@ using namespace std;
 
 constexpr auto CASES = 64;
 
-const int fitness(vector<bool>& values) {
-    auto fitness = 0;
-    for (int i = 0; i < CASES; i++) {
-        auto currentOutput = evaluate(values, i);
-        if (currentOutput == actualOutput(values)) {
-            fitness++;
-        }
-    }
-    return fitness;
-}
-
 const bool evaluate(vector<bool>& values, int i) {
     /*
 				a0  a1  d0  d1  d2  d3
@@ -54,6 +43,17 @@ const bool actualOutput(vector<bool>& values) {
         return values[3];
     }
     return values[2];
+}
+
+const int fitness(vector<bool>& values) {
+    auto fitness = 0;
+    for (int i = 0; i < CASES; i++) {
+        auto currentOutput = evaluate(values, i);
+        if (currentOutput == actualOutput(values)) {
+            fitness++;
+        }
+    }
+    return fitness;
 }
 
 int main() {
