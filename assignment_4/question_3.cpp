@@ -3,61 +3,129 @@
 
 using namespace std;
 
-constexpr auto CASES = 64;
+const vector<vector<const bool> > v {
+	{0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 1},
 
-const bool evaluate(vector<bool>& values, int i) {
-    /*
-				a0  a1  d0  d1  d2  d3
-		i = 0:  0   0   0   0   0   0
-		i = 1:  0   0   0   0   0   1
-		i = 2:  0   0   0   0   1   0
-		i = 3:  0   0   0   0   1   1
-		i = 4:  0   0   0   1   0   0
-		i = 5:  0   0   0   1   0   1
-		i = 6:  0   0   0   1   1   0
-		i = 7:  0   0   0   1   1   1
-		i = 8:  0   0   1   0   0   0
-		i = 9:  0   0   1   0   0   1
-		...
-	*/
+	{0, 0, 0, 0, 1, 0},
+	{0, 0, 0, 0, 1, 1},
 
-    return true;
+	{0, 0, 0, 1, 0, 0},
+	{0, 0, 0, 1, 0, 1},
+	{0, 0, 0, 1, 1, 0},
+	{0, 0, 0, 1, 1, 1},
+
+	{0, 0, 1, 0, 0, 0},
+	{0, 0, 1, 0, 0, 1},
+	{0, 0, 1, 0, 1, 0},
+	{0, 0, 1, 0, 1, 1},
+	{0, 0, 1, 1, 0, 0},
+	{0, 0, 1, 1, 0, 1},
+	{0, 0, 1, 1, 1, 0},
+	{0, 0, 1, 1, 1, 1},
+
+	{0, 1, 0, 0, 0, 0},
+	{0, 1, 0, 0, 0, 1},
+	{0, 1, 0, 0, 1, 0},
+	{0, 1, 0, 0, 1, 1},
+	{0, 1, 0, 1, 0, 0},
+	{0, 1, 0, 1, 0, 1},
+	{0, 1, 0, 1, 1, 0},
+	{0, 1, 0, 1, 1, 1},
+	{0, 1, 1, 0, 0, 0},
+	{0, 1, 1, 0, 0, 1},
+	{0, 1, 1, 0, 1, 0},
+	{0, 1, 1, 0, 1, 1},
+	{0, 1, 1, 1, 0, 0},
+	{0, 1, 1, 1, 0, 1},
+	{0, 1, 1, 1, 1, 0},
+	{0, 1, 1, 1, 1, 1},
+
+	{1, 0, 0, 0, 0, 0},
+	{1, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 1, 0},
+	{1, 0, 0, 0, 1, 1},
+	{1, 0, 0, 1, 0, 0},
+	{1, 0, 0, 1, 0, 1},
+	{1, 0, 0, 1, 1, 0},
+	{1, 0, 0, 1, 1, 1},
+	{1, 0, 1, 0, 0, 0},
+	{1, 0, 1, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0},
+	{1, 0, 1, 0, 1, 1},
+	{1, 0, 1, 1, 0, 0},
+	{1, 0, 1, 1, 0, 1},
+	{1, 0, 1, 1, 1, 0},
+	{1, 0, 1, 1, 1, 1},
+	{1, 1, 0, 0, 0, 0},
+	{1, 1, 0, 0, 0, 1},
+	{1, 1, 0, 0, 1, 0},
+	{1, 1, 0, 0, 1, 1},
+	{1, 1, 0, 1, 0, 0},
+	{1, 1, 0, 1, 0, 1},
+	{1, 1, 0, 1, 1, 0},
+	{1, 1, 0, 1, 1, 1},
+	{1, 1, 1, 0, 0, 0},
+	{1, 1, 1, 0, 0, 1},
+	{1, 1, 1, 0, 1, 0},
+	{1, 1, 1, 0, 1, 1},
+	{1, 1, 1, 1, 0, 0},
+	{1, 1, 1, 1, 0, 1},
+	{1, 1, 1, 1, 1, 0},
+	{1, 1, 1, 1, 1, 1}
+};
+
+const bool evaluate(int i) {
+	auto a0 = v[i][0];
+	auto a1 = v[i][1];
+	auto d0 = v[i][2];
+	auto d1 = v[i][3];
+	auto d2 = v[i][4];
+	auto d3 = v[i][5];
+
+	auto program = a0 ? (((a0 ? a0 : a1) ? a1 : !d1) ? d3 : d2) 
+		: (a1 ? (a0 ? d3 : d1) : d0);
+
+    return program;
 }
 
-const bool actualOutput(vector<bool>& values) {
-	/*
-		a0  a1  d0  d1  d2  d3
-		0   0   1   0   0   0
-		0   1   0   1   0   0
-		1   0   0   0   1   0
-		1   1   0   0   0   1
-	*/
+const bool actualOutput(int i) {
+	auto a0 = v[i][0];
+	auto a1 = v[i][1];
+	auto d0 = v[i][2];
+	auto d1 = v[i][3];
+	auto d2 = v[i][4];
+	auto d3 = v[i][5];
 
-    if (values[0] && values[1]) {
-        return values[5];
+    if (a0 && a1) {
+        return d3;
     }
-    if (values[0]) {
-        return values[4];
+    if (a0) {
+        return d2;
     }
-    if (values[1]) {
-        return values[3];
+    if (a1) {
+        return d1;
     }
-    return values[2];
+    return d0;
 }
 
-const int fitness(vector<bool>& values) {
+const int fitness() {
     auto fitness = 0;
-    for (int i = 0; i < CASES; i++) {
-        auto currentOutput = evaluate(values, i);
-        if (currentOutput == actualOutput(values)) {
-            fitness++;
+    for (int i = 0; i < v.size(); ++i) {
+        auto currentOutput = evaluate(i);
+        if (currentOutput == actualOutput(i)) {
+            ++fitness;
         }
+		cout << "Current: " << currentOutput 
+			 << " Actual: " << actualOutput(i) 
+			 << " Fitness: " << fitness << endl;
     }
     return fitness;
 }
 
 int main() {
-    cout << "Genetic Programming" << endl;
+    auto result = fitness();
+	cout << "Fitness: " << result << endl;
 
     return 0;
 }
