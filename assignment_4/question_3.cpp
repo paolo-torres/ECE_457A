@@ -3,7 +3,7 @@
 
 using namespace std;
 
-const vector<vector<const bool> > v {
+const vector<vector<const bool> > cases {
 	{0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 1},
 
@@ -75,28 +75,46 @@ const vector<vector<const bool> > v {
 	{1, 1, 1, 1, 1, 1}
 };
 
-const bool evaluate(int i) {
-	auto a0 = v[i][0];
-	auto a1 = v[i][1];
-	auto d0 = v[i][2];
-	auto d1 = v[i][3];
-	auto d2 = v[i][4];
-	auto d3 = v[i][5];
-
+const bool evaluateOutput(int i, bool a0, bool a1, bool d0, bool d1, bool d2, bool d3) {
 	auto program = a0 ? (((a0 ? a0 : a1) ? a1 : !d1) ? d3 : d2) 
 		: (a1 ? (a0 ? d3 : d1) : d0);
+	
+	/*
+		if (a0) {
+			auto x = 0;
+			if (a0) {
+				x = a0;
+			} else {
+				x = a1;
+			}
+			auto y = 0;
+			if (x) {
+				y = a1;
+			} else {
+				y = !d1;
+			}
+			if (y) {
+				return d3;
+			} else {
+				return d2;
+			}
+		} else {
+			if (a1) {
+				if (a0) {
+					return d3;
+				} else {
+					return d1;
+				}
+			} else {
+				return d0;
+			}
+		}
+	*/
 
     return program;
 }
 
-const bool actualOutput(int i) {
-	auto a0 = v[i][0];
-	auto a1 = v[i][1];
-	auto d0 = v[i][2];
-	auto d1 = v[i][3];
-	auto d2 = v[i][4];
-	auto d3 = v[i][5];
-
+const bool correctOutput(int i, bool a0, bool a1, bool d0, bool d1, bool d2, bool d3) {
     if (a0 && a1) {
         return d3;
     }
@@ -111,14 +129,18 @@ const bool actualOutput(int i) {
 
 const int fitness() {
     auto fitness = 0;
-    for (int i = 0; i < v.size(); ++i) {
-        auto currentOutput = evaluate(i);
-        if (currentOutput == actualOutput(i)) {
+    for (int i = 0; i < cases.size(); ++i) {
+		auto a0 = cases[i][0];
+		auto a1 = cases[i][1];
+		auto d0 = cases[i][2];
+		auto d1 = cases[i][3];
+		auto d2 = cases[i][4];
+		auto d3 = cases[i][5];
+        auto currentOutput = evaluateOutput(i, a0, a1, d0, d1, d2, d3);
+		auto actualOutput = correctOutput(i, a0, a1, d0, d1, d2, d3);
+        if (currentOutput == actualOutput) {
             ++fitness;
         }
-		cout << "Current: " << currentOutput 
-			 << " Actual: " << actualOutput(i) 
-			 << " Fitness: " << fitness << endl;
     }
     return fitness;
 }
