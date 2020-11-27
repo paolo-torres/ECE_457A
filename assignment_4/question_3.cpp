@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <vector>
 
 using namespace std;
@@ -145,9 +146,95 @@ const int fitness() {
     return fitness;
 }
 
+struct TreeNode {
+	string val;
+	TreeNode* left;
+	TreeNode* right;
+	TreeNode(string s) : val(s), left(NULL), right(NULL) {}
+};
+
+const void generate(TreeNode* root, vector<string>& functions, 
+	vector<string>& terminals, mt19937& rng) {
+	for (int i = 0; i < terminals.size(); ++i) {
+		cout << terminals[i] << " ";
+	}
+	cout << endl;
+
+	if (terminals.empty()) {
+		return;
+	}
+
+	uniform_int_distribution<int> uniBinary(0, 1);
+	auto direction = uniBinary(rng);
+
+	if (direction == 0) {
+		auto type = uniBinary(rng);
+		if (type == 0) {
+			uniform_int_distribution<int> uniFunctions(0, 3);
+			auto function = uniFunctions(rng);
+			root->left = new TreeNode(functions[function]);
+		} else {
+			uniform_int_distribution<int> uniTerminals(0, terminals.size() - 1);
+			auto terminal = uniTerminals(rng);
+			root->left = new TreeNode(terminals[terminal]);
+
+			terminals.erase(terminals.begin() + terminal);
+		}
+		generate(root->left, functions, terminals, rng);
+	} else {
+		auto type = uniBinary(rng);
+		if (type == 0) {
+			uniform_int_distribution<int> uniFunctions(0, 3);
+			auto function = uniFunctions(rng);
+			root->right = new TreeNode(functions[function]);
+		} else {
+			uniform_int_distribution<int> uniTerminals(0, terminals.size() - 1);
+			auto terminal = uniTerminals(rng);
+			root->right = new TreeNode(terminals[terminal]);
+
+			terminals.erase(terminals.begin() + terminal);
+		}
+		generate(root->right, functions, terminals, rng);
+	}
+}
+
+const void showTree(TreeNode* root, vector<string>& tree) {
+	if (root == NULL) {
+		return;
+	}
+	showTree(root->left, tree);
+	tree.push_back(root->val);
+	showTree(root->right, tree);
+}
+
+const void generateTree() {
+	vector<string> functions = {"AND", "OR", "NOT", "IF"};
+	vector<string> terminals = {"a0", "a1", "d0", "d1", "d2", "d3"};
+
+	random_device rd;
+	mt19937 rng(rd());
+
+	uniform_int_distribution<int> uniFunctions(0, 3);
+	auto start = uniFunctions(rng);
+
+	TreeNode* root = new TreeNode(functions[start]);
+	TreeNode* head = root;
+
+	generate(root, functions, terminals, rng);
+	
+	vector<string> tree;
+	showTree(head, tree);
+
+	for (int i = 0; i < tree.size(); ++i) {
+		cout << tree[i] << endl;
+	}
+}
+
 int main() {
     auto result = fitness();
 	cout << "Fitness: " << result << endl;
+
+	generateTree();
 
     return 0;
 }
