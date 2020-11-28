@@ -5,6 +5,9 @@
 
 using namespace std;
 
+const vector<string> functions = {"AND", "OR", "NOT", "IF"};
+const vector<string> terminals = {"a0", "a1", "d0", "d1", "d2", "d3"};
+
 const vector<vector<const bool> > cases {
 	{0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 1},
@@ -84,9 +87,8 @@ struct TreeNode {
 	TreeNode(string s) : val(s), left(NULL), right(NULL) {}
 };
 
-const void generate(TreeNode* root, vector<string>& functions, 
-	vector<string> terminals, mt19937& rng) {
-	if (terminals.empty()) {
+const void generate(TreeNode* root, vector<string>& defaultTerminals, mt19937& rng) {
+	if (defaultTerminals.empty()) {
 		return;
 	}
 
@@ -97,16 +99,16 @@ const void generate(TreeNode* root, vector<string>& functions,
 		auto type = uniBinary(rng);
 		if (type == 0) {
 			uniform_int_distribution<int> uniFunctions(0, 3);
-			auto function = uniFunctions(rng);
-			root->left = new TreeNode(functions[function]);
+			auto functionIndex = uniFunctions(rng);
+			root->left = new TreeNode(functions[functionIndex]);
 		} else {
-			uniform_int_distribution<int> uniTerminals(0, terminals.size() - 1);
-			auto terminal = uniTerminals(rng);
-			root->left = new TreeNode(terminals[terminal]);
+			uniform_int_distribution<int> uniTerminals(0, defaultTerminals.size() - 1);
+			auto terminalIndex = uniTerminals(rng);
+			root->left = new TreeNode(defaultTerminals[terminalIndex]);
 
-			terminals.erase(terminals.begin() + terminal);
+			defaultTerminals.erase(defaultTerminals.begin() + terminalIndex);
 		}
-		generate(root->left, functions, terminals, rng);
+		generate(root->left, defaultTerminals, rng);
 	} else {
 		auto type = uniBinary(rng);
 		if (type == 0) {
@@ -114,54 +116,55 @@ const void generate(TreeNode* root, vector<string>& functions,
 			auto function = uniFunctions(rng);
 			root->right = new TreeNode(functions[function]);
 		} else {
-			uniform_int_distribution<int> uniTerminals(0, terminals.size() - 1);
+			uniform_int_distribution<int> uniTerminals(0, defaultTerminals.size() - 1);
 			auto terminal = uniTerminals(rng);
-			root->right = new TreeNode(terminals[terminal]);
+			root->right = new TreeNode(defaultTerminals[terminal]);
 
-			terminals.erase(terminals.begin() + terminal);
+			defaultTerminals.erase(defaultTerminals.begin() + terminal);
 		}
-		generate(root->right, functions, terminals, rng);
+		generate(root->right, defaultTerminals, rng);
 	}
 }
 
-const void storeTrees(TreeNode* head, vector<vector<string>>& initTrees, 
-	vector<string>& functions, int i) {
+const void storeTrees(TreeNode* head, vector<vector<string>>& initFunctions,
+	vector<vector<string>>& initTerminals, int i) {
 	if (head == NULL) {
 		return;
 	}
-	storeTrees(head->left, initTrees, functions, i);
+	storeTrees(head->left, initFunctions, initTerminals, i);
 	if (find(functions.begin(), functions.end(), head->val) != functions.end()) {
-		initTrees[i].insert(initTrees[i].begin(), head->val);
+		initFunctions[i].push_back(head->val);
 	} else {
-		initTrees[i].push_back(head->val);
+		initTerminals[i].push_back(head->val);
 	}
-	storeTrees(head->right, initTrees, functions, i);
+	storeTrees(head->right, initFunctions, initTerminals, i);
 }
 
-const void generateTrees(vector<vector<string>>& initTrees, 
-	vector<string>& functions, vector<string>& terminals, const int populationSize) {
-	random_device rd;
-	mt19937 rng(rd());
-
+const void generateTrees(vector<vector<string>>& initFunctions,
+	vector<vector<string>>& initTerminals, const int populationSize,
+	mt19937& rng) {
 	for (int i = 0; i < populationSize; ++i) {
-		uniform_int_distribution<int> uniFunctions(0, 3);
-		auto start = uniFunctions(rng);
-
-		TreeNode* root = new TreeNode(functions[start]);
+		TreeNode* root = new TreeNode(functions[3]);
 		TreeNode* head = root;
 
-		generate(root, functions, terminals, rng);
+		vector<string> defaultTerminals = terminals;
+		generate(root, defaultTerminals, rng);
 
-		initTrees.push_back(vector<string>());
-		storeTrees(head, initTrees, functions, i);
-		initTrees[i][0] = functions[3];
+		storeTrees(head, initFunctions, initTerminals, i);
 	}
 }
 
-const void showTrees(vector<vector<string>>& initTrees) {
-	for (int i = 0; i < initTrees.size(); ++i) {
-		for (int j = 0; j < initTrees[i].size(); ++j) {
-			cout << initTrees[i][j] << " ";
+const void showTrees(vector<vector<string>>& initFunctions,
+	vector<vector<string>>& initTerminals) {
+	for (int i = 0; i < initFunctions.size(); ++i) {
+		for (int j = 0; j < initFunctions[i].size(); ++j) {
+			cout << initFunctions[i][j] << " ";
+		}
+		cout << endl;
+	}
+	for (int i = 0; i < initTerminals.size(); ++i) {
+		for (int j = 0; j < initTerminals[i].size(); ++j) {
+			cout << initTerminals[i][j] << " ";
 		}
 		cout << endl;
 	}
@@ -205,30 +208,34 @@ const int evaluate(const string program) {
     return fitness;
 }
 
-const void evolve(vector<vector<string>>& initTrees, const int numGenerations,
-	const double crossover, const double mutation, string& bestProgram, 
+const void evolve(vector<vector<string>>& initFunctions,
+	vector<vector<string>>& initTerminals, const int numGenerations,
+	const double crossover, const double mutation, string& bestProgram,
 	int& bestFitness) {
 	bestProgram = "IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0";
 	bestFitness = evaluate(bestProgram);
 }
 
 int main() {
-	vector<string> functions = {"AND", "OR", "NOT", "IF"};
-	vector<string> terminals = {"a0", "a1", "d0", "d1", "d2", "d3"};
+	random_device rd;
+	mt19937 rng(rd());
 
 	const auto populationSize = 10;
 	const auto numGenerations = 50;
 	const auto crossover = 0.5;
 	const auto mutation = 0.05;
 
-	vector<vector<string>> initTrees;
-	generateTrees(initTrees, functions, terminals, populationSize);
-	showTrees(initTrees);
+	vector<vector<string>> initFunctions(populationSize, vector<string>());
+	vector<vector<string>> initTerminals(populationSize, vector<string>());
+
+	generateTrees(initFunctions, initTerminals, populationSize, rng);
+	showTrees(initFunctions, initTerminals);
 
 	string bestProgram = "";
 	auto bestFitness = 0;
 
-	evolve(initTrees, numGenerations, crossover, mutation, bestProgram, bestFitness);
+	evolve(initFunctions, initTerminals, numGenerations, crossover, mutation, 
+	bestProgram, bestFitness);
 
 	cout << "Best Program: " << bestProgram << endl;
 	cout << "Best Fitness: " << bestFitness << endl;
