@@ -154,12 +154,7 @@ struct TreeNode {
 };
 
 const void generate(TreeNode* root, vector<string>& functions, 
-	vector<string>& terminals, mt19937& rng) {
-	for (int i = 0; i < terminals.size(); ++i) {
-		cout << terminals[i] << " ";
-	}
-	cout << endl;
-
+	vector<string> terminals, mt19937& rng) {
 	if (terminals.empty()) {
 		return;
 	}
@@ -198,43 +193,55 @@ const void generate(TreeNode* root, vector<string>& functions,
 	}
 }
 
-const void showTree(TreeNode* root, vector<string>& tree) {
-	if (root == NULL) {
+const void storeTrees(TreeNode* head, vector<vector<string>>& initTrees, int i) {
+	if (head == NULL) {
 		return;
 	}
-	showTree(root->left, tree);
-	tree.push_back(root->val);
-	showTree(root->right, tree);
+	storeTrees(head->left, initTrees, i);
+	initTrees[i].push_back(head->val);
+	storeTrees(head->right, initTrees, i);
 }
 
-const void generateTree() {
-	vector<string> functions = {"AND", "OR", "NOT", "IF"};
-	vector<string> terminals = {"a0", "a1", "d0", "d1", "d2", "d3"};
-
+const void generateTrees(vector<vector<string>>& initTrees, 
+	vector<string>& functions, vector<string>& terminals, const int populationSize) {
 	random_device rd;
 	mt19937 rng(rd());
 
-	uniform_int_distribution<int> uniFunctions(0, 3);
-	auto start = uniFunctions(rng);
+	for (int i = 0; i < populationSize; ++i) {
+		uniform_int_distribution<int> uniFunctions(0, 3);
+		auto start = uniFunctions(rng);
 
-	TreeNode* root = new TreeNode(functions[start]);
-	TreeNode* head = root;
+		TreeNode* root = new TreeNode(functions[start]);
+		TreeNode* head = root;
 
-	generate(root, functions, terminals, rng);
-	
-	vector<string> tree;
-	showTree(head, tree);
+		generate(root, functions, terminals, rng);
 
-	for (int i = 0; i < tree.size(); ++i) {
-		cout << tree[i] << endl;
+		initTrees.push_back(vector<string>());
+		storeTrees(head, initTrees, i);
+	}
+}
+
+const void showTrees(vector<vector<string>>& initTrees) {
+	for (int i = 0; i < initTrees.size(); ++i) {
+		for (int j = 0; j < initTrees[i].size(); ++j) {
+			cout << initTrees[i][j] << " ";
+		}
+		cout << endl;
 	}
 }
 
 int main() {
-    auto result = fitness();
-	cout << "Fitness: " << result << endl;
+    auto bestFitness = fitness();
+	cout << "Best Fitness: " << bestFitness << endl << endl;
 
-	generateTree();
+	vector<string> functions = {"AND", "OR", "NOT", "IF"};
+	vector<string> terminals = {"a0", "a1", "d0", "d1", "d2", "d3"};
+
+	const auto populationSize = 10;
+
+	vector<vector<string>> initTrees;
+	generateTrees(initTrees, functions, terminals, populationSize);
+	showTrees(initTrees);
 
     return 0;
 }
