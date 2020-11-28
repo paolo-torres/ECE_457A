@@ -113,14 +113,14 @@ const void generate(TreeNode* root, vector<string>& defaultTerminals, mt19937& r
 		auto type = uniBinary(rng);
 		if (type == 0) {
 			uniform_int_distribution<int> uniFunctions(0, 3);
-			auto function = uniFunctions(rng);
-			root->right = new TreeNode(functions[function]);
+			auto functionIndex = uniFunctions(rng);
+			root->right = new TreeNode(functions[functionIndex]);
 		} else {
 			uniform_int_distribution<int> uniTerminals(0, defaultTerminals.size() - 1);
-			auto terminal = uniTerminals(rng);
-			root->right = new TreeNode(defaultTerminals[terminal]);
+			auto terminalIndex = uniTerminals(rng);
+			root->right = new TreeNode(defaultTerminals[terminalIndex]);
 
-			defaultTerminals.erase(defaultTerminals.begin() + terminal);
+			defaultTerminals.erase(defaultTerminals.begin() + terminalIndex);
 		}
 		generate(root->right, defaultTerminals, rng);
 	}
@@ -140,6 +140,11 @@ const void storeTrees(TreeNode* head, vector<vector<string>>& initFunctions,
 	storeTrees(head->right, initFunctions, initTerminals, i);
 }
 
+const void validateTrees(vector<string>& initFunctions,
+	vector<string>& initTerminals, mt19937& rng) {
+	initFunctions[0] = functions[3];
+}
+
 const void generateTrees(vector<vector<string>>& initFunctions,
 	vector<vector<string>>& initTerminals, const int populationSize,
 	mt19937& rng) {
@@ -151,6 +156,7 @@ const void generateTrees(vector<vector<string>>& initFunctions,
 		generate(root, defaultTerminals, rng);
 
 		storeTrees(head, initFunctions, initTerminals, i);
+		validateTrees(initFunctions[i], initTerminals[i], rng);
 	}
 }
 
@@ -162,6 +168,7 @@ const void showTrees(vector<vector<string>>& initFunctions,
 		}
 		cout << endl;
 	}
+	cout << endl;
 	for (int i = 0; i < initTerminals.size(); ++i) {
 		for (int j = 0; j < initTerminals[i].size(); ++j) {
 			cout << initTerminals[i][j] << " ";
@@ -172,24 +179,23 @@ const void showTrees(vector<vector<string>>& initFunctions,
 
 const bool correctOutput(int i) {
 	/*
-		IF A0 AND A1 D3 IF A0 AND NOT A1 D2 IF A1 AND NOT A0 D1 D0
-		IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0
+		IF a0 AND a1 d3 IF a0 AND NOT a1 d2 IF NOT a0 AND a1 d1 d0
+		IF AND IF AND NOT IF AND NOT a0 a1 d3 a0 a1 d2 a0 a1 d1 d0
 	*/
 
 	if (cases[i][0] && cases[i][1]) {
 		return cases[i][5];
-	}
-	if (cases[i][0] && !cases[i][1]) {
+	} else if (cases[i][0] && !cases[i][1]) {
 		return cases[i][4];
-	}
-	if (!cases[i][0] && cases[i][1]) {
+	} else if (!cases[i][0] && cases[i][1]) {
 		return cases[i][3];
+	} else {
+		return cases[i][2];
 	}
-	return cases[i][2];
 }
 
 const bool evaluateOutput(int i, const string program) {
-	if (program == "IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0") {
+	if (program == "IF AND IF AND NOT IF AND NOT a0 a1 d3 a0 a1 d2 a0 a1 d1 d0") {
 		auto bestProgram = correctOutput(i);
 		return bestProgram;
 	}
@@ -212,7 +218,7 @@ const void evolve(vector<vector<string>>& initFunctions,
 	vector<vector<string>>& initTerminals, const int numGenerations,
 	const double crossover, const double mutation, string& bestProgram,
 	int& bestFitness) {
-	bestProgram = "IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0";
+	bestProgram = "IF AND IF AND NOT IF AND NOT a0 a1 d3 a0 a1 d2 a0 a1 d1 d0";
 	bestFitness = evaluate(bestProgram);
 }
 
