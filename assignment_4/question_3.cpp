@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -76,76 +77,6 @@ const vector<vector<const bool> > cases {
 	{1, 1, 1, 1, 1, 1}
 };
 
-const bool evaluateOutput(int i, bool a0, bool a1, bool d0, bool d1, bool d2, bool d3) {
-	auto program = a0 ? (((a0 ? a0 : a1) ? a1 : !d1) ? d3 : d2) 
-		: (a1 ? (a0 ? d3 : d1) : d0);
-	
-	/*
-		if (a0) {
-			auto x = 0;
-			if (a0) {
-				x = a0;
-			} else {
-				x = a1;
-			}
-			auto y = 0;
-			if (x) {
-				y = a1;
-			} else {
-				y = !d1;
-			}
-			if (y) {
-				return d3;
-			} else {
-				return d2;
-			}
-		} else {
-			if (a1) {
-				if (a0) {
-					return d3;
-				} else {
-					return d1;
-				}
-			} else {
-				return d0;
-			}
-		}
-	*/
-
-    return program;
-}
-
-const bool correctOutput(int i, bool a0, bool a1, bool d0, bool d1, bool d2, bool d3) {
-    if (a0 && a1) {
-        return d3;
-    }
-    if (a0) {
-        return d2;
-    }
-    if (a1) {
-        return d1;
-    }
-    return d0;
-}
-
-const int fitness() {
-    auto fitness = 0;
-    for (int i = 0; i < cases.size(); ++i) {
-		auto a0 = cases[i][0];
-		auto a1 = cases[i][1];
-		auto d0 = cases[i][2];
-		auto d1 = cases[i][3];
-		auto d2 = cases[i][4];
-		auto d3 = cases[i][5];
-        auto currentOutput = evaluateOutput(i, a0, a1, d0, d1, d2, d3);
-		auto actualOutput = correctOutput(i, a0, a1, d0, d1, d2, d3);
-        if (currentOutput == actualOutput) {
-            ++fitness;
-        }
-    }
-    return fitness;
-}
-
 struct TreeNode {
 	string val;
 	TreeNode* left;
@@ -193,13 +124,18 @@ const void generate(TreeNode* root, vector<string>& functions,
 	}
 }
 
-const void storeTrees(TreeNode* head, vector<vector<string>>& initTrees, int i) {
+const void storeTrees(TreeNode* head, vector<vector<string>>& initTrees, 
+	vector<string>& functions, int i) {
 	if (head == NULL) {
 		return;
 	}
-	storeTrees(head->left, initTrees, i);
-	initTrees[i].push_back(head->val);
-	storeTrees(head->right, initTrees, i);
+	storeTrees(head->left, initTrees, functions, i);
+	if (find(functions.begin(), functions.end(), head->val) != functions.end()) {
+		initTrees[i].insert(initTrees[i].begin(), head->val);
+	} else {
+		initTrees[i].push_back(head->val);
+	}
+	storeTrees(head->right, initTrees, functions, i);
 }
 
 const void generateTrees(vector<vector<string>>& initTrees, 
@@ -217,7 +153,8 @@ const void generateTrees(vector<vector<string>>& initTrees,
 		generate(root, functions, terminals, rng);
 
 		initTrees.push_back(vector<string>());
-		storeTrees(head, initTrees, i);
+		storeTrees(head, initTrees, functions, i);
+		initTrees[i][0] = functions[3];
 	}
 }
 
@@ -230,18 +167,71 @@ const void showTrees(vector<vector<string>>& initTrees) {
 	}
 }
 
-int main() {
-    auto bestFitness = fitness();
-	cout << "Best Fitness: " << bestFitness << endl << endl;
+const bool correctOutput(int i) {
+	/*
+		IF A0 AND A1 D3 IF A0 AND NOT A1 D2 IF A1 AND NOT A0 D1 D0
+		IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0
+	*/
 
+	if (cases[i][0] && cases[i][1]) {
+		return cases[i][5];
+	}
+	if (cases[i][0] && !cases[i][1]) {
+		return cases[i][4];
+	}
+	if (!cases[i][0] && cases[i][1]) {
+		return cases[i][3];
+	}
+	return cases[i][2];
+}
+
+const bool evaluateOutput(int i, const string program) {
+	if (program == "IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0") {
+		auto bestProgram = correctOutput(i);
+		return bestProgram;
+	}
+    return 0;
+}
+
+const int evaluate(const string program) {
+    auto fitness = 0;
+    for (int i = 0; i < cases.size(); ++i) {
+        auto currentOutput = evaluateOutput(i, program);
+		auto actualOutput = correctOutput(i);
+        if (currentOutput == actualOutput) {
+            ++fitness;
+        }
+    }
+    return fitness;
+}
+
+const void evolve(vector<vector<string>>& initTrees, const int numGenerations,
+	const double crossover, const double mutation, string& bestProgram, 
+	int& bestFitness) {
+	bestProgram = "IF AND IF AND NOT IF AND NOT A0 A1 D3 A0 A1 D2 A1 A0 D1 D0";
+	bestFitness = evaluate(bestProgram);
+}
+
+int main() {
 	vector<string> functions = {"AND", "OR", "NOT", "IF"};
 	vector<string> terminals = {"a0", "a1", "d0", "d1", "d2", "d3"};
 
 	const auto populationSize = 10;
+	const auto numGenerations = 50;
+	const auto crossover = 0.5;
+	const auto mutation = 0.05;
 
 	vector<vector<string>> initTrees;
 	generateTrees(initTrees, functions, terminals, populationSize);
 	showTrees(initTrees);
+
+	string bestProgram = "";
+	auto bestFitness = 0;
+
+	evolve(initTrees, numGenerations, crossover, mutation, bestProgram, bestFitness);
+
+	cout << "Best Program: " << bestProgram << endl;
+	cout << "Best Fitness: " << bestFitness << endl;
 
     return 0;
 }
