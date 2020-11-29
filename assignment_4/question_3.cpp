@@ -140,18 +140,21 @@ const void generateTrees(vector<vector<string>>& initFunctions,
 	}
 }
 
-const void showTrees(vector<vector<string>>& initFunctions,
-	vector<vector<string>>& initTerminals) {
-	for (int i = 0; i < initFunctions.size(); ++i) {
-		for (int j = 0; j < initFunctions[i].size(); ++j) {
-			cout << initFunctions[i][j] << " ";
-		}
-		cout << endl;
+const void combineTrees(vector<vector<string>>& initFunctions,
+	vector<vector<string>>& initTerminals, vector<vector<string>>& initSolutions,
+	const int populationSize) {
+	initSolutions = initFunctions;
+	for (int i = 0; i < populationSize; ++i) {
+		initSolutions[i].insert(initSolutions[i].end(), initTerminals[i].begin(),
+			initTerminals[i].end());
 	}
-	cout << endl;
-	for (int i = 0; i < initTerminals.size(); ++i) {
-		for (int j = 0; j < initTerminals[i].size(); ++j) {
-			cout << initTerminals[i][j] << " ";
+}
+
+const void displayTrees(vector<vector<string>>& initSolutions) {
+	for (int i = 0; i < initSolutions.size(); ++i) {
+		cout << "Program " << i + 1 << ": \t";
+		for (int j = 0; j < initSolutions[i].size(); ++j) {
+			cout << initSolutions[i][j] << " ";
 		}
 		cout << endl;
 	}
@@ -189,12 +192,24 @@ const int evaluate(const string program) {
     return fitness;
 }
 
-const void evolve(vector<vector<string>>& initFunctions,
-	vector<vector<string>>& initTerminals, const int numGenerations,
-	const double crossover, const double mutation, string& bestProgram,
-	int& bestFitness) {
+const void evolve(vector<vector<string>>& initSolutions, const int numGenerations,
+	const double crossover, const double mutation, mt19937& rng,
+	string& bestProgram, int& bestFitness) {
 	bestProgram = "IF AND IF AND NOT IF AND NOT a0 a1 d3 a0 a1 d2 a0 a1 d1 d0";
 	bestFitness = evaluate(bestProgram);
+
+	int generation = 0;
+	while (generation < numGenerations) {
+		uniform_int_distribution<int> uniBinary(0, 1);
+		auto variationOperator = uniBinary(rng);
+		if (variationOperator == 0) {
+			// Crossover
+		} else {
+			// Mutation
+
+		}
+		++generation;
+	}
 }
 
 int main() {
@@ -208,19 +223,21 @@ int main() {
 	const auto maxDepth = 7;
 
 	vector<vector<string>> initFunctions(populationSize, vector<string>());
-	vector<vector<string>> initTerminals(populationSize, vector<string>());
+	auto initTerminals = initFunctions;
+	auto initSolutions = initFunctions;
 
 	generateTrees(initFunctions, initTerminals, populationSize, maxDepth, rng);
-	showTrees(initFunctions, initTerminals);
+	combineTrees(initFunctions, initTerminals, initSolutions, populationSize);
+	displayTrees(initSolutions);
 
 	string bestProgram = "";
 	auto bestFitness = 0;
 
-	evolve(initFunctions, initTerminals, numGenerations, crossover, mutation, 
-	bestProgram, bestFitness);
+	evolve(initSolutions, numGenerations, crossover, mutation, rng, bestProgram,
+		bestFitness);
 
-	cout << "Best Program: " << bestProgram << endl;
-	cout << "Best Fitness: " << bestFitness << endl;
+	cout << "Best Program:\t" << bestProgram << endl;
+	cout << "Best Fitness:\t" << bestFitness << endl;
 
     return 0;
 }
