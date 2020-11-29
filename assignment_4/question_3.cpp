@@ -87,76 +87,56 @@ struct TreeNode {
 	TreeNode(string s) : val(s), left(NULL), right(NULL) {}
 };
 
-const void generate(TreeNode* root, vector<string>& defaultTerminals, mt19937& rng) {
-	if (defaultTerminals.empty()) {
+const void generate(TreeNode* root, mt19937& rng, const int maxDepth) {
+	if (maxDepth == 0) {
 		return;
 	}
 
 	uniform_int_distribution<int> uniBinary(0, 1);
 	auto direction = uniBinary(rng);
 
+	uniform_int_distribution<int> uniFunctions(0, 3);
+	auto functionIndex = uniFunctions(rng);
+
 	if (direction == 0) {
-		auto type = uniBinary(rng);
-		if (type == 0) {
-			uniform_int_distribution<int> uniFunctions(0, 3);
-			auto functionIndex = uniFunctions(rng);
-			root->left = new TreeNode(functions[functionIndex]);
-		} else {
-			uniform_int_distribution<int> uniTerminals(0, defaultTerminals.size() - 1);
-			auto terminalIndex = uniTerminals(rng);
-			root->left = new TreeNode(defaultTerminals[terminalIndex]);
-
-			defaultTerminals.erase(defaultTerminals.begin() + terminalIndex);
-		}
-		generate(root->left, defaultTerminals, rng);
+		root->left = new TreeNode(functions[functionIndex]);
+		generate(root->left, rng, maxDepth - 1);
 	} else {
-		auto type = uniBinary(rng);
-		if (type == 0) {
-			uniform_int_distribution<int> uniFunctions(0, 3);
-			auto functionIndex = uniFunctions(rng);
-			root->right = new TreeNode(functions[functionIndex]);
-		} else {
-			uniform_int_distribution<int> uniTerminals(0, defaultTerminals.size() - 1);
-			auto terminalIndex = uniTerminals(rng);
-			root->right = new TreeNode(defaultTerminals[terminalIndex]);
-
-			defaultTerminals.erase(defaultTerminals.begin() + terminalIndex);
-		}
-		generate(root->right, defaultTerminals, rng);
+		root->right = new TreeNode(functions[functionIndex]);
+		generate(root->right, rng, maxDepth - 1);
 	}
 }
 
-const void storeTrees(TreeNode* head, vector<vector<string>>& initFunctions,
-	vector<vector<string>>& initTerminals, int i) {
+const void storeFunctions(TreeNode* head, vector<vector<string>>& initFunctions, int i) {
 	if (head == NULL) {
 		return;
 	}
-	storeTrees(head->left, initFunctions, initTerminals, i);
-	if (find(functions.begin(), functions.end(), head->val) != functions.end()) {
-		initFunctions[i].push_back(head->val);
-	} else {
-		initTerminals[i].push_back(head->val);
-	}
-	storeTrees(head->right, initFunctions, initTerminals, i);
+	storeFunctions(head->left, initFunctions, i);
+	initFunctions[i].push_back(head->val);
+	storeFunctions(head->right, initFunctions, i);
 }
 
-const void validateTrees(vector<string>& initFunctions,
-	vector<string>& initTerminals, mt19937& rng) {
-	initFunctions[0] = functions[3];
+const void storeTerminals(vector<string>& initTerminals, mt19937& rng, const int maxDepth) {
+	initTerminals = terminals;
+	shuffle(begin(initTerminals), end(initTerminals), rng);
+	uniform_int_distribution<int> uniInputs(0, 1);
+	int n = (maxDepth + 1) / 2;
+	for (int i = 0; i < n; ++i) {
+		auto inputIndex = uniInputs(rng);
+		initTerminals.push_back(terminals[inputIndex]);
+	}
 }
 
 const void generateTrees(vector<vector<string>>& initFunctions,
 	vector<vector<string>>& initTerminals, const int populationSize,
-	mt19937& rng) {
+	const int maxDepth, mt19937& rng) {
 	for (int i = 0; i < populationSize; ++i) {
 		TreeNode* root = new TreeNode(functions[3]);
 		TreeNode* head = root;
 
-		vector<string> defaultTerminals = terminals;
-		generate(root, defaultTerminals, rng);
-
-		storeTrees(head, initFunctions, initTerminals, i);
-		validateTrees(initFunctions[i], initTerminals[i], rng);
+		generate(root, rng, maxDepth);
+		storeFunctions(head, initFunctions, i);
+		storeTerminals(initTerminals[i], rng, maxDepth);
 	}
 }
 
@@ -178,11 +158,6 @@ const void showTrees(vector<vector<string>>& initFunctions,
 }
 
 const bool correctOutput(int i) {
-	/*
-		IF a0 AND a1 d3 IF a0 AND NOT a1 d2 IF NOT a0 AND a1 d1 d0
-		IF AND IF AND NOT IF AND NOT a0 a1 d3 a0 a1 d2 a0 a1 d1 d0
-	*/
-
 	if (cases[i][0] && cases[i][1]) {
 		return cases[i][5];
 	} else if (cases[i][0] && !cases[i][1]) {
@@ -230,11 +205,12 @@ int main() {
 	const auto numGenerations = 50;
 	const auto crossover = 0.5;
 	const auto mutation = 0.05;
+	const auto maxDepth = 7;
 
 	vector<vector<string>> initFunctions(populationSize, vector<string>());
 	vector<vector<string>> initTerminals(populationSize, vector<string>());
 
-	generateTrees(initFunctions, initTerminals, populationSize, rng);
+	generateTrees(initFunctions, initTerminals, populationSize, maxDepth, rng);
 	showTrees(initFunctions, initTerminals);
 
 	string bestProgram = "";
