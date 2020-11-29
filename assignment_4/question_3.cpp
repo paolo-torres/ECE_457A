@@ -194,7 +194,31 @@ const void evolve(vector<vector<string>>& solutions, const int numGenerations,
 
 		if (variationOperator == 0) {
 			if (probability < crossoverProbability) {
-				// Apply Crossover
+				auto first = rand() * solutions.size() / RAND_MAX;
+				auto second = rand() * (solutions.size() - 1) / RAND_MAX;
+				if (second >= first) {
+					++second;
+				}
+				
+				auto firstParent = solutions[first];
+				auto secondParent = solutions[second];
+
+				auto firstFitness = evaluate(firstParent, correctProgram);
+				auto secondFitness = evaluate(secondParent, correctProgram);
+
+				auto firstElement = rand() * firstParent.size() / RAND_MAX;
+				auto secondElement = rand() * secondParent.size() / RAND_MAX;
+				if (secondElement >= firstElement) {
+					++secondElement;
+				}
+
+				swap(firstParent[firstElement], secondParent[secondElement]);
+				auto newFirstFitness = evaluate(firstParent, correctProgram);
+				auto newSecondFitness = evaluate(secondParent, correctProgram);
+
+				if (firstFitness + secondFitness > newFirstFitness + newSecondFitness) {
+					swap(firstParent[firstElement], secondParent[secondElement]);
+				}
 			}
 		} else {
 			if (probability < mutationProbability) {
@@ -210,8 +234,8 @@ int main() {
 	mt19937 rng(rd());
 
 	const auto populationSize = 10;
-	const auto numGenerations = 50;
-	const auto crossoverProbability = 0.5;
+	const auto numGenerations = 500;
+	const auto crossoverProbability = 0.9;
 	const auto mutationProbability = 0.05;
 	const auto maxDepth = 7;
 
@@ -238,9 +262,14 @@ int main() {
 	for (int i = 0; i < correctProgram.size(); ++i) {
 		cout << correctProgram[i] << " ";
 	}
-	cout << endl;
+	cout << endl << endl;
 
-	cout << "Best Fitness: " << bestFitness << endl;
+	cout << "Best Program:\t";
+	for (int i = 0; i < bestProgram.size(); ++i) {
+		cout << bestProgram[i] << " ";
+	}
+	cout << endl;
+	cout << "Best Fitness:\t" << bestFitness << endl;
 
     return 0;
 }
