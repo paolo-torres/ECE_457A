@@ -118,13 +118,13 @@ const void storeFunctions(TreeNode* head, vector<vector<string>>& initFunctions,
 
 const void storeTerminals(vector<string>& initTerminals, mt19937& rng, const int maxDepth) {
 	initTerminals = terminals;
-	shuffle(begin(initTerminals), end(initTerminals), rng);
 	uniform_int_distribution<int> uniInputs(0, 1);
 	int n = (maxDepth + 1) / 2;
 	for (int i = 0; i < n; ++i) {
 		auto inputIndex = uniInputs(rng);
 		initTerminals.push_back(terminals[inputIndex]);
 	}
+	shuffle(begin(initTerminals), end(initTerminals), rng);
 }
 
 const void generateTrees(vector<vector<string>>& initFunctions,
