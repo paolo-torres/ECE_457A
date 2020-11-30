@@ -170,7 +170,9 @@ const double evaluate(vector<string>& solution, vector<string>& correctProgram) 
             ++fitness;
         }
     }
-    return fitness / solution.size();
+	int fitnessRounded = (int) fitness * cases.size() / solution.size();
+	double fitnessFinal = (double) fitnessRounded / cases.size();
+    return fitnessFinal;
 }
 
 const void performCrossover(vector<vector<string>>& solutions, int i,
@@ -227,9 +229,6 @@ const void evolve(vector<vector<string>>& solutions, const int numGenerations,
 
 	int generation = 1;
 	while (generation <= numGenerations) {
-		uniform_real_distribution<> uniOperator(0, 1);
-		auto probability = uniOperator(rng);
-
 		for (int i = 0; i < solutions.size(); ++i) {
 			auto currentFitness = evaluate(solutions[i], correctProgram);
 			if (currentFitness > bestFitness) {
@@ -242,6 +241,9 @@ const void evolve(vector<vector<string>>& solutions, const int numGenerations,
 			uniform_int_distribution<int> uniBinary(0, 1);
 			auto variationOperator = uniBinary(rng);
 
+			uniform_real_distribution<> uniOperator(0, 1);
+			auto probability = uniOperator(rng);
+
 			if (variationOperator == 0) {
 				if (probability < crossoverProbability) {
 					performCrossover(solutions, i, rng, correctProgram);
@@ -253,15 +255,8 @@ const void evolve(vector<vector<string>>& solutions, const int numGenerations,
 			}
 		}
 
-		cout << generation << ": ";
-		for (int i = 0; i < bestProgram.size(); ++i) {
-			cout << bestProgram[i] << " ";
-		}
-		cout << "Fitness: " << bestFitness << endl;
-
 		++generation;
 	}
-	cout << endl;
 }
 
 int main() {
